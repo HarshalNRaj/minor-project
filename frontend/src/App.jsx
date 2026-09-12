@@ -88,7 +88,7 @@ function AnimatedRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/minor-project">
       <AuthProvider>
         <AnimatedRoutes />
       </AuthProvider>
