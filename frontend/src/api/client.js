@@ -3,7 +3,7 @@ import axios from "axios";
 export const API_BASE =
   import.meta.env.VITE_API_BASE || "https://resqlink-platform.onrender.com/api";
 
-const api = axios.create({ baseURL: API_BASE, timeout: 15000 });
+const api = axios.create({ baseURL: API_BASE, timeout: 30000 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("resqlink_access");
@@ -42,7 +42,7 @@ api.interceptors.response.use(
       const { data } = await axios.post(
         `${API_BASE}/auth/login/refresh/`,
         { refresh },
-        { timeout: 15000 },
+        { timeout: 30000 },
       );
       localStorage.setItem("resqlink_access", data.access);
       api.defaults.headers.common.Authorization = `Bearer ${data.access}`;

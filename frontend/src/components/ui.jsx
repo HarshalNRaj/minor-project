@@ -29,6 +29,32 @@ export function TextInput(props) {
   );
 }
 
+export function PasswordInput({ value, onChange, required, autoComplete = "current-password" }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div className="relative">
+      <TextInput
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        required={required}
+        autoComplete={autoComplete}
+        className="pr-10"
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((current) => !current)}
+        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-ink-soft hover:text-primary-500"
+        aria-label={visible ? "Hide password" : "Show password"}
+        title={visible ? "Hide password" : "Show password"}
+      >
+        {visible ? <EyeOff size={17} /> : <Eye size={17} />}
+      </button>
+    </div>
+  );
+}
+
 export function TextArea(props) {
   return (
     <textarea
@@ -48,3 +74,5 @@ export function Select({ children, ...props }) {
     </select>
   );
 }
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";

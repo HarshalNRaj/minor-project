@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
-import { FieldLabel, Select, TextInput } from "../components/ui";
+import { FieldLabel, PasswordInput, Select, TextInput } from "../components/ui";
 
 const ROLES = [
   { value: "general", label: "General user — browse & request" },
@@ -24,6 +24,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
+  const [waitingForServer, setWaitingForServer] = useState(false);
 
   const needsOrg = form.role === "ngo" || form.role === "blood_bank";
 
@@ -33,6 +34,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setLoading(true);
+    const waitTimer = window.setTimeout(() => setWaitingForServer(true), 2000);
     try {
       const { message } = await register(form);
       if (needsOrg) {
@@ -45,7 +47,12 @@ export default function Register() {
     } catch (err) {
       const data = err.response?.data;
       const firstError = data && typeof data === "object" ? Object.values(data)[0] : null;
-      setError((Array.isArray(firstError) ? firstError[0] : firstError) || "Registration failed. Please check your details.");
+      setError(err.code === "ECONNABORTED"
+        ? "The server is waking up. Please submit again in a moment."
+        : (Array.isArray(firstError) ? firstError[0] : firstError) || "Registration failed. Please check your details.");
+    } finally {
+      window.clearTimeout(waitTimer);
+      setWaitingForServer(false);
       setLoading(false);
     }
   };
@@ -118,7 +125,7 @@ export default function Register() {
 
           <div>
             <FieldLabel>Password</FieldLabel>
-            <TextInput type="password" value={form.password} onChange={handleChange("password")} required />
+            <PasswordInput value={form.password} onChange={handleChange("password")} required autoComplete="new-password" />
           </div>
 
           {needsOrg && (
@@ -146,6 +153,11 @@ export default function Register() {
           <Button type="submit" disabled={loading} className="w-full font-mono text-xs uppercase tracking-[0.2em] py-2.5">
             {loading ? "Creating account…" : "Register Account →"}
           </Button>
+          {waitingForServer && (
+            <p className="text-center text-[11px] font-mono text-ink-muted">
+              Connecting to the community server…
+            </p>
+          )}
         </form>
 
         <p className="mt-6 text-center text-xs font-mono text-ink-soft">

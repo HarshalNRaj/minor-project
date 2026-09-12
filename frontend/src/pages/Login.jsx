@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
-import { FieldLabel, TextInput } from "../components/ui";
+import { FieldLabel, PasswordInput, TextInput } from "../components/ui";
 
 export default function Login() {
   const { login } = useAuth();
@@ -10,17 +10,23 @@ export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [waitingForServer, setWaitingForServer] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    const waitTimer = window.setTimeout(() => setWaitingForServer(true), 2000);
     try {
       await login(form.username, form.password);
       navigate("/app");
     } catch (err) {
-      setError(err.response?.data?.detail || "Couldn't sign in. Check your username and password.");
+      setError(err.code === "ECONNABORTED"
+        ? "The server is waking up. Please try again in a moment."
+        : err.response?.data?.detail || "Couldn't sign in. Check your username and password.");
     } finally {
+      window.clearTimeout(waitTimer);
+      setWaitingForServer(false);
       setLoading(false);
     }
   };
@@ -56,8 +62,7 @@ export default function Login() {
           </div>
           <div>
             <FieldLabel>Password</FieldLabel>
-            <TextInput
-              type="password"
+            <PasswordInput
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
@@ -66,6 +71,11 @@ export default function Login() {
           <Button type="submit" disabled={loading} className="w-full font-mono text-xs uppercase tracking-[0.2em] py-2.5">
             {loading ? "Signing in…" : "Sign in →"}
           </Button>
+          {waitingForServer && (
+            <p className="text-center text-[11px] font-mono text-ink-muted">
+              Connecting to the community server…
+            </p>
+          )}
         </form>
 
         <p className="mt-6 text-center text-xs font-mono text-ink-soft">
