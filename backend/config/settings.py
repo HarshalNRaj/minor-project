@@ -117,6 +117,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Allow the GitHub Pages frontend in production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://harshalNRaj.github.io",
+    "https://harshalnraj.github.io",
     "https://resqlink-platform.onrender.com",
 ]
