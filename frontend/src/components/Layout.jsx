@@ -1,5 +1,5 @@
 import {
-  BarChart3, Droplet, LayoutDashboard, LogOut, Package, ShieldCheck, Siren, User, UtensilsCrossed,
+  ArrowLeft, BarChart3, Droplet, LayoutDashboard, LogOut, Package, ShieldCheck, ShoppingCart, Siren, User, UtensilsCrossed,
 } from "lucide-react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
@@ -74,6 +74,17 @@ export default function Layout() {
               Verifications
             </NavLink>
           )}
+          <NavLink
+            to="/app/orders"
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded-md px-3 py-2.5 text-xs font-mono uppercase tracking-[0.14em] transition-colors ${
+                isActive ? "bg-primary-500 text-paper shadow-sm" : "text-ink-soft hover:bg-paper-soft/70 hover:text-ink"
+              }`
+            }
+          >
+            <ShoppingCart size={16} />
+            My Orders
+          </NavLink>
         </nav>
         <div className="border-t border-line px-3 py-3 bg-surface-soft/40">
           <NavLink
@@ -99,7 +110,12 @@ export default function Layout() {
 
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-line bg-surface/90 backdrop-blur-sm px-4 py-3 md:px-8">
-          <div className="md:hidden font-serif text-xl font-bold text-ink lowercase">resqlink</div>
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={() => navigate(-1)} className="text-ink-soft hover:text-primary-500" aria-label="Go back">
+              <ArrowLeft size={18} />
+            </button>
+            <div className="md:hidden font-serif text-xl font-bold text-ink lowercase">resqlink</div>
+          </div>
           <div className="hidden md:flex items-center gap-2 text-xs font-mono text-ink-muted uppercase tracking-widest">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-700 animate-pulse" />
             <span>Mysuru Dispatch</span>

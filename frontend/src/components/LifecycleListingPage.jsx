@@ -137,6 +137,11 @@ export default function LifecycleListingPage({ title, api, ownerField, fields, c
                     {it.requester_username && (
                       <p className="mt-1 font-mono text-[11px] text-ink-muted">Requested by {it.requester_username}</p>
                     )}
+                    {(it.owner_phone || it.provider_phone || it.requester_phone) && (
+                      <p className="mt-1 font-mono text-[11px] text-primary-600">
+                        Contact: {it.owner_phone || it.provider_phone || it.requester_phone}
+                      </p>
+                    )}
                     {it.volunteer_username && (
                       <p className="mt-0.5 font-mono text-[11px] text-ink-muted">Volunteer: {it.volunteer_username}</p>
                     )}

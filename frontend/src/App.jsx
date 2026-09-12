@@ -15,6 +15,7 @@ import EmergencyPage from "./pages/EmergencyPage";
 import ImpactPage from "./pages/ImpactPage";
 import ProfilePage from "./pages/ProfilePage";
 import VerificationsPage from "./pages/VerificationsPage";
+import OrdersPage from "./pages/OrdersPage";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -78,6 +79,7 @@ function AnimatedRoutes() {
           <Route path="impact" element={<ImpactPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="verifications" element={<VerificationsPage />} />
+          <Route path="orders" element={<OrdersPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

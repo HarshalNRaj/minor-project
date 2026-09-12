@@ -109,6 +109,14 @@ export default function Register() {
           </div>
 
           <div>
+            <FieldLabel>Contact phone</FieldLabel>
+            <TextInput type="tel" value={form.phone} onChange={handleChange("phone")} required />
+            <p className="mt-1.5 font-mono text-[11px] text-ink-muted">
+              Shared with people involved in your requests so they can coordinate pickup or delivery.
+            </p>
+          </div>
+
+          <div>
             <FieldLabel>Password</FieldLabel>
             <TextInput type="password" value={form.password} onChange={handleChange("password")} required />
           </div>

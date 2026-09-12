@@ -60,3 +60,10 @@ export const notifications = {
 export const impact = {
   summary: () => api.get("/impact/summary/"),
 };
+
+export const orders = {
+  requestedResources: () => api.get("/resources/", { params: { mine: "requested" } }),
+  requestedFood: () => api.get("/food/", { params: { mine: "requested" } }),
+  volunteeringResources: () => api.get("/resources/", { params: { mine: "volunteering" } }),
+  volunteeringFood: () => api.get("/food/", { params: { mine: "volunteering" } }),
+};
