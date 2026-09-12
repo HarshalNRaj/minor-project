@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  /* Template Theme Tokens from https://resqlink.sitesplaced.site/
+     Natural Bookhouse aesthetic: Deep forest green, oxblood accents, warm cream canvas,
+     crisp paper cards, and rich editorial typography with DM Mono code/tag details. */
+  --color-paper: #F2E9D8;
+  --color-paper-soft: #EADFC8;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F9F5EC;
+  --color-ink: #1A1410;
+  --color-ink-soft: #3D3027;
+  --color-ink-muted: #6B5B52;
+
+  --color-primary-50: #EBF1EA;
+  --color-primary-100: #D6E3D5;
+  --color-primary-500: #2C3A2C;
+  --color-primary-600: #232E23;
+  --color-primary-700: #1B241B;
+
+  --color-urgent-50: #FBF0F0;
+  --color-urgent-100: #F3D5D5;
+  --color-urgent-500: #6B1F1F;
+  --color-urgent-600: #551818;
+
+  --color-amber-50: #FAF2E3;
+  --color-amber-500: #9E6B20;
+  --color-amber-600: #7E5417;
+
+  --color-line: rgba(26, 20, 16, 0.12);
+  --color-line-dark: rgba(26, 20, 16, 0.22);
+  --color-footer: #1A0E0A;
+
+  --font-display: "EB Garamond", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "EB Garamond", Georgia, serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #F2E9D8;
+  color: #1A1410;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display, .font-serif {
+  font-family: "EB Garamond", Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.font-mono, .font-stat, .font-badge {
+  font-family: "DM Mono", monospace;
+}
+
+.font-stat {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: 0.75rem;
+  font-family: var(--font-body);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #EADFC8;
+}
+::-webkit-scrollbar-thumb {
+  background: #C4B9A3;
+  border-radius: 8px;
+}
