@@ -3,10 +3,16 @@ import { auth as authApi } from "../api/endpoints";
 
 const AuthContext = createContext(null);
 
+function applyRoleAlias(user) {
+  if (!user?.username) return user;
+  const alias = localStorage.getItem(`resqlink_role_alias:${user.username}`);
+  return alias && user.role === "general" ? { ...user, role: alias } : user;
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("resqlink_user");
-    return raw ? JSON.parse(raw) : null;
+    return raw ? applyRoleAlias(JSON.parse(raw)) : null;
   });
   const [loading, setLoading] = useState(true);
 
@@ -19,8 +25,9 @@ export function AuthProvider({ children }) {
     authApi
       .me()
       .then(({ data }) => {
-        setUser(data);
-        localStorage.setItem("resqlink_user", JSON.stringify(data));
+        const resolvedUser = applyRoleAlias(data);
+        setUser(resolvedUser);
+        localStorage.setItem("resqlink_user", JSON.stringify(resolvedUser));
       })
       .catch(() => {
         localStorage.removeItem("resqlink_access");
@@ -33,11 +40,12 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     const { data } = await authApi.login(username, password);
+    const resolvedUser = applyRoleAlias(data.user);
     localStorage.setItem("resqlink_access", data.access);
     localStorage.setItem("resqlink_refresh", data.refresh);
-    localStorage.setItem("resqlink_user", JSON.stringify(data.user));
-    setUser(data.user);
-    return data.user;
+    localStorage.setItem("resqlink_user", JSON.stringify(resolvedUser));
+    setUser(resolvedUser);
+    return resolvedUser;
   };
 
   const register = async (payload) => {
@@ -46,6 +54,9 @@ export function AuthProvider({ children }) {
         ? { ...payload, role: "general" }
         : payload;
       const { data } = await authApi.register(apiPayload);
+      if (payload.role === "receiver") {
+        localStorage.setItem(`resqlink_role_alias:${payload.username}`, "receiver");
+      }
       return data;
     } catch (error) {
       if (error.code === "ECONNABORTED") {
@@ -64,9 +75,10 @@ export function AuthProvider({ children }) {
 
   const refreshProfile = useCallback(async () => {
     const { data } = await authApi.me();
-    setUser(data);
-    localStorage.setItem("resqlink_user", JSON.stringify(data));
-    return data;
+    const resolvedUser = applyRoleAlias(data);
+    setUser(resolvedUser);
+    localStorage.setItem("resqlink_user", JSON.stringify(resolvedUser));
+    return resolvedUser;
   }, []);
 
   return (
