@@ -41,8 +41,15 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (payload) => {
-    const { data } = await authApi.register(payload);
-    return data;
+    try {
+      const { data } = await authApi.register(payload);
+      return data;
+    } catch (error) {
+      if (error.code === "ECONNABORTED") {
+        throw new Error("The server took too long to respond. Please try again in a moment.");
+      }
+      throw error;
+    }
   };
 
   const logout = () => {
