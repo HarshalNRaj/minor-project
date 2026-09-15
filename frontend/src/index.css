@@ -73,6 +73,24 @@ h1, h2, h3, h4, .font-display {
 .animate-rise-in-delay-3 { animation-delay: 360ms; }
 .animate-drift { animation: drift 6s ease-in-out infinite; }
 
+.interactive-control {
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.interactive-control:active {
+  transform: scale(0.96);
+}
+
+.notification-pulse {
+  animation: notification-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes notification-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(163, 66, 53, 0); }
+  50% { box-shadow: 0 0 0 5px rgba(163, 66, 53, 0.18); }
+}
+
 .page-transition {
   animation: rise-in 420ms cubic-bezier(.22, 1, .36, 1) both;
 }

@@ -16,19 +16,32 @@ export default function BloodPage() {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [error, setError] = useState("");
 
-  const load = () => {
+  const load = async () => {
     setLoading(true);
-    blood.list().then(({ data }) => setItems(data.results || data)).finally(() => setLoading(false));
+    try {
+      const { data } = await blood.list();
+      setItems(data.results || data);
+      setError("");
+    } catch {
+      setError("Blood requests could not be loaded. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(load, []);
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    await blood.create(form);
-    setForm(DEFAULT_FORM);
-    setShowForm(false);
-    load();
+    try {
+      await blood.create(form);
+      setForm(DEFAULT_FORM);
+      setShowForm(false);
+      load();
+    } catch (err) {
+      setError(err.response?.data?.detail || "The blood request could not be posted.");
+    }
   };
 
   const act = async (fn, id) => {
@@ -46,11 +59,21 @@ export default function BloodPage() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-bold text-ink">Blood requests</h1>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-ink">Blood coordination</h1>
+          <p className="mt-1 text-sm text-ink-soft">Find, request, and fulfill blood units for patients in need.</p>
+        </div>
         {["receiver", "general", "admin"].includes(user?.role) && (
           <Button onClick={() => setShowForm((v) => !v)}>{showForm ? "Cancel" : "+ New request"}</Button>
         )}
       </div>
+
+      {error && (
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-urgent-500/30 bg-urgent-50 px-4 py-3 text-sm text-urgent-600">
+          <span>{error}</span>
+          <button type="button" className="font-semibold underline" onClick={load}>Retry</button>
+        </div>
+      )}
 
       {showForm && (
         <Card className="mt-4">
@@ -102,12 +125,12 @@ export default function BloodPage() {
             <EmptyState title="No open blood requests" body="When someone posts a request, it'll show up here." />
           </div>
         ) : (
-          items.map((r) => {
+          items.map((r, index) => {
             const isRequester = r.requester === user.id;
             const isDonor = user.role === "donor";
             const isBloodBankUser = user.role === "blood_bank";
             return (
-              <Card key={r.id}>
+              <Card key={r.id} className="animate-rise-in" style={{ animationDelay: `${index * 80}ms` }}>
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-display text-lg font-bold text-primary-700">{r.blood_group}</h3>
                   <div className="flex flex-col items-end gap-1.5">

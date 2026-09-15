@@ -42,7 +42,7 @@ export default function Layout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                `interactive-control flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive ? "bg-primary-500 text-white" : "text-ink-soft hover:bg-primary-50 hover:text-primary-700"
                 }`
               }
@@ -55,7 +55,7 @@ export default function Layout() {
             <NavLink
               to="/app/verifications"
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                `interactive-control flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive ? "bg-primary-500 text-white" : "text-ink-soft hover:bg-primary-50 hover:text-primary-700"
                 }`
               }
@@ -69,7 +69,7 @@ export default function Layout() {
           <NavLink
             to="/app/profile"
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
+              `interactive-control flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
                 isActive ? "bg-primary-50 text-primary-700" : "text-ink-soft hover:bg-primary-50"
               }`
             }
