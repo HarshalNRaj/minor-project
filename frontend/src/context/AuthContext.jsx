@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { auth as authApi } from "../api/endpoints";
 
 const AuthContext = createContext(null);
@@ -52,14 +52,15 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     const { data } = await authApi.me();
     setUser(data);
     localStorage.setItem("resqlink_user", JSON.stringify(data));
-  };
+    return data;
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshProfile, refreshUser: refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

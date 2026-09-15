@@ -1,0 +1,12 @@
+backend/.env
+backend/db.sqlite3
+backend/staticfiles/
+backend/media/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+frontend/.env.local
+frontend/.env
+frontend/node_modules/
+frontend/dist/
+*.log

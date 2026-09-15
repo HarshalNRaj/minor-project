@@ -1,5 +1,12 @@
-"""ResQLink backend settings."""
+"""
+ResQLink backend settings.
+
+Supports MySQL for local development. Set DB_ENGINE=mysql and provide
+DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, and DB_PORT through environment
+variables. SQLite remains the safe zero-config local fallback.
+"""
 import os
+import dj_database_url
 from datetime import timedelta
 from pathlib import Path
 
@@ -64,18 +71,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME", "resqlink"),
-        "USER": os.environ.get("DB_USER", "root"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "3306"),
-        "OPTIONS": {"charset": "utf8mb4"},
-        "CONN_MAX_AGE": 60,
-    },
-}
+# Production: Render injects DATABASE_URL automatically.
+# Local development: MySQL when explicitly configured; SQLite fallback.
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+elif os.environ.get("DB_ENGINE", "sqlite").lower() == "mysql":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": os.environ.get("DB_NAME", "resqlink"),
+            "USER": os.environ.get("DB_USER", "root"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+            "HOST": os.environ.get("DB_HOST", "localhost"),
+            "PORT": os.environ.get("DB_PORT", "3306"),
+            "OPTIONS": {"charset": "utf8mb4"},
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -94,6 +118,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -117,6 +143,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Allow the GitHub Pages frontend in production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://harshalnraj.github.io",
+    "https://harshalNRaj.github.io",
     "https://resqlink-platform.onrender.com",
 ]

@@ -1,1 +1,0 @@
-# ResQLink Apps Package

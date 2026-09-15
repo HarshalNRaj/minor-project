@@ -13,7 +13,7 @@ export const auth = {
 export const resources = {
   list: (params) => api.get("/resources/", { params }),
   get: (id) => api.get(`/resources/${id}/`),
-  create: (payload) => api.post("/resources/", payload),
+  create: (payload) => api.post("/resources/", payload, { headers: { "Content-Type": "multipart/form-data" } }),
   requestItem: (id) => api.post(`/resources/${id}/request_item/`),
   assign: (id) => api.post(`/resources/${id}/assign/`),
   complete: (id) => api.post(`/resources/${id}/complete/`),
@@ -23,7 +23,7 @@ export const resources = {
 export const food = {
   list: (params) => api.get("/food/", { params }),
   get: (id) => api.get(`/food/${id}/`),
-  create: (payload) => api.post("/food/", payload),
+  create: (payload) => api.post("/food/", payload, { headers: { "Content-Type": "multipart/form-data" } }),
   requestItem: (id) => api.post(`/food/${id}/request_item/`),
   assign: (id) => api.post(`/food/${id}/assign/`),
   complete: (id) => api.post(`/food/${id}/complete/`),
@@ -59,11 +59,4 @@ export const notifications = {
 
 export const impact = {
   summary: () => api.get("/impact/summary/"),
-};
-
-export const orders = {
-  requestedResources: () => api.get("/resources/", { params: { mine: "requested" } }),
-  requestedFood: () => api.get("/food/", { params: { mine: "requested" } }),
-  volunteeringResources: () => api.get("/resources/", { params: { mine: "volunteering" } }),
-  volunteeringFood: () => api.get("/food/", { params: { mine: "volunteering" } }),
 };

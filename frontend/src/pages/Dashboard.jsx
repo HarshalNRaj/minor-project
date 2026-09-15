@@ -1,101 +1,160 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { resources, food, blood, emergency, impact as impactApi } from "../api/endpoints";
 import { Card } from "../components/ui";
 import StatusBadge from "../components/StatusBadge";
+import { getRoleConfig } from "../roleAccess";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const role = user?.role;
+  const roleConfig = getRoleConfig(role);
+  const isDonor = role === "donor";
+  const isResponder = role === "volunteer" || role === "ngo";
+
   const [stats, setStats] = useState(null);
   const [myResources, setMyResources] = useState([]);
   const [myFood, setMyFood] = useState([]);
   const [myBlood, setMyBlood] = useState([]);
   const [myEmergency, setMyEmergency] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    impactApi.summary().then(({ data }) => setStats(data)).catch(() => {});
-    resources.list({ mine: "owned" }).then(({ data }) => setMyResources(data.results || data)).catch(() => {});
-    food.list({ mine: "provided" }).then(({ data }) => setMyFood(data.results || data)).catch(() => {});
-    blood.list({ mine: "requested" }).then(({ data }) => setMyBlood(data.results || data)).catch(() => {});
-    emergency.list({ mine: "requested" }).then(({ data }) => setMyEmergency(data.results || data)).catch(() => {});
-  }, []);
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+
+    const load = async () => {
+      try {
+        if (typeof refreshUser === "function") {
+          await refreshUser();
+        }
+
+        const [statsRes, resourcesRes, foodRes, bloodRes, emergencyRes] =
+          await Promise.all([
+            impactApi.summary(),
+            resources.list({ mine: roleConfig.resourceMine }),
+            food.list({ mine: roleConfig.foodMine }),
+            blood.list({ mine: roleConfig.bloodMine }),
+            emergency.list({ mine: roleConfig.emergencyMine }),
+          ]);
+
+        if (!mounted) return;
+
+        setStats(statsRes.data);
+        setMyResources(resourcesRes.data?.results || resourcesRes.data || []);
+        setMyFood(foodRes.data?.results || foodRes.data || []);
+        setMyBlood(bloodRes.data?.results || bloodRes.data || []);
+        setMyEmergency(emergencyRes.data?.results || emergencyRes.data || []);
+        setLoading(false);
+      } catch (err) {
+        if (!mounted) return;
+        setError(
+          err?.response?.data?.detail ||
+            err?.message ||
+            "Failed to load dashboard. Please check your connection and try again."
+        );
+        setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [
+    refreshKey,
+    refreshUser,
+    roleConfig.resourceMine,
+    roleConfig.foodMine,
+    roleConfig.bloodMine,
+    roleConfig.emergencyMine,
+  ]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[320px] items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-primary-600 border-t-transparent" />
+          <p className="mt-4 text-sm text-ink-soft">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <div className="py-8 text-center">
+          <h2 className="font-display text-lg font-semibold text-ink">Unable to load dashboard</h2>
+          <p className="mt-2 text-sm text-ink-soft">{error}</p>
+          <button
+            type="button"
+            onClick={() => setRefreshKey((key) => key + 1)}
+            className="mt-4 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white"
+          >
+            Retry
+          </button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between border-b border-line pb-4 mb-6">
-        <div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#6B1F1F]">
-            Member Overview
-          </span>
-          <h1 className="font-serif text-3xl font-medium text-ink mt-1">
-            Welcome, {user?.first_name || user?.username}
-          </h1>
-        </div>
-        <p className="font-mono text-xs text-ink-muted uppercase tracking-widest mt-2 sm:mt-0">
-          Role: <span className="text-[#2C3A2C] font-semibold">{user?.role?.replace("_", " ")}</span>
-        </p>
-      </div>
+      <h1 className="animate-rise-in font-display text-2xl font-bold text-ink">
+        Welcome, {user?.first_name || user?.username}
+      </h1>
+      <p className="mt-1 text-sm text-ink-soft">{roleConfig.label}</p>
+      <p className="mt-4 max-w-xl text-sm text-ink-soft">{roleConfig.intro}</p>
 
       {stats && (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {[
-            { label: "Items Reused", value: stats.items_reused, color: "text-[#2C3A2C]" },
-            { label: "Food Portions Rescued", value: stats.food_portions_rescued, color: "text-[#2C3A2C]" },
-            { label: "Blood Units Fulfilled", value: stats.blood_units_fulfilled, color: "text-[#6B1F1F]" },
-            { label: "Emergencies Fulfilled", value: stats.emergencies_fulfilled, color: "text-[#6B1F1F]" },
-          ].map((item, idx) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.06, duration: 0.3 }}
-              whileHover={{ y: -3 }}
-            >
-              <Card className="border-[#1A1410]/12">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-muted block">{item.label}</span>
-                <p className={`font-serif text-3xl font-normal ${item.color} mt-2`}>{item.value}</p>
-              </Card>
-            </motion.div>
-          ))}
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <StatCard label="Items reused" value={stats.items_reused} />
+          <StatCard label="Food portions rescued" value={stats.food_portions_rescued} />
+          <StatCard label="Blood units fulfilled" value={stats.blood_units_fulfilled} />
+          <StatCard label="Emergencies fulfilled" value={stats.emergencies_fulfilled} />
         </div>
       )}
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
-        <Section title="Your resource listings" viewAll="/app/resources" items={myResources} empty="You haven't listed anything yet." />
-        <Section title="Your food listings" viewAll="/app/food" items={myFood} empty="No food listings yet." />
-        <Section title="Your blood requests" viewAll="/app/blood" items={myBlood} empty="No blood requests yet." nameKey={(r) => `${r.blood_group} × ${r.units_needed} — ${r.hospital_name}`} />
-        <Section title="Your emergency requests" viewAll="/app/emergency" items={myEmergency} empty="No emergency requests yet." nameKey={(r) => r.request_type} />
+        <Section title={isDonor ? "Items you are donating" : isResponder ? "Resource deliveries" : "Requested items"} viewAll="/app/resources" items={myResources} empty={isDonor ? "You have not listed any items yet." : "No resource activity yet."} />
+        <Section title={isDonor ? "Food you are rescuing" : isResponder ? "Food deliveries" : "Requested food"} viewAll="/app/food" items={myFood} empty="No food activity yet." />
+        <Section title={role === "blood_bank" ? "Matched blood requests" : isDonor ? "Blood commitments" : "Your blood requests"} viewAll="/app/blood" items={myBlood} empty="No blood activity yet." nameKey={(r) => `${r.blood_group} × ${r.units_needed} — ${r.hospital_name}`} />
+        <Section title={isResponder ? "Assigned emergencies" : "Your emergency requests"} viewAll="/app/emergency" items={myEmergency} empty="No emergency activity yet." nameKey={(r) => r.request_type} />
       </div>
     </div>
   );
 }
 
+function StatCard({ label, value }) {
+  return (
+    <Card className="animate-rise-in editorial-card">
+      <p className="text-xs text-ink-soft">{label}</p>
+      <p className="font-stat mt-1 text-2xl font-bold text-primary-700">{value}</p>
+    </Card>
+  );
+}
+
 function Section({ title, viewAll, items, empty, nameKey }) {
   return (
-    <Card className="border-[#1A1410]/12">
-      <div className="flex items-center justify-between border-b border-line pb-3">
-        <h2 className="font-serif text-lg font-medium text-ink">{title}</h2>
-        <Link to={viewAll} className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#2C3A2C] hover:text-[#6B1F1F] transition-colors">
-          View all →
-        </Link>
+    <Card>
+      <div className="flex items-center justify-between">
+        <h2 className="font-display font-semibold text-ink">{title}</h2>
+        <Link to={viewAll} className="text-xs font-semibold text-primary-600 hover:underline">View all</Link>
       </div>
       {items.length === 0 ? (
-        <p className="mt-4 text-xs font-mono text-ink-muted">{empty}</p>
+        <p className="mt-3 text-sm text-ink-soft">{empty}</p>
       ) : (
-        <ul className="mt-4 space-y-2">
-          {items.slice(0, 5).map((it, idx) => (
-            <motion.li
-              key={it.id}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.05, duration: 0.25 }}
-              className="flex items-center justify-between rounded-md border border-line bg-surface-soft/40 px-3 py-2 text-xs"
-            >
-              <span className="truncate font-medium text-ink">{nameKey ? nameKey(it) : it.title}</span>
+        <ul className="mt-3 space-y-2">
+          {items.slice(0, 5).map((it) => (
+            <li key={it.id} className="flex items-center justify-between rounded-lg border border-line px-3 py-2 text-sm">
+              <span className="truncate">{nameKey ? nameKey(it) : it.title}</span>
               <StatusBadge status={it.status} />
-            </motion.li>
+            </li>
           ))}
         </ul>
       )}

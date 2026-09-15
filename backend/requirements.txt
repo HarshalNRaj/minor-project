@@ -1,4 +1,4 @@
-Django==5.2.6
+Django==6.1
 djangorestframework==3.18.0
 djangorestframework-simplejwt==5.5.1
 django-cors-headers==4.9.0
@@ -10,6 +10,9 @@ gunicorn==23.0.0
 # Static file serving
 whitenoise==6.9.0
 
-# MySQL (pure Python driver; no C++ build tools required on Windows)
+# PostgreSQL (Render)
+dj-database-url==2.3.0
+psycopg2-binary==2.9.10
+
+# MySQL local development (pure Python driver; works without C++ build tools)
 PyMySQL==1.1.1
-cryptography==46.0.1

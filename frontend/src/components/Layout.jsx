@@ -1,24 +1,24 @@
 import {
-  ArrowLeft, BarChart3, Droplet, LayoutDashboard, LogOut, Package, ShieldCheck, ShoppingCart, Siren, User, UtensilsCrossed,
+  BarChart3, Droplet, LayoutDashboard, LogOut, Package, ShieldCheck, Siren, User, UtensilsCrossed,
 } from "lucide-react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
+import { canAccess, getRoleConfig } from "../roleAccess";
 
 const NAV = [
-  { to: "/app", icon: LayoutDashboard, label: "Resource Dashboard", end: true },
-  { to: "/app/resources", icon: Package, label: "Resource Catalogue" },
-  { to: "/app/food", icon: UtensilsCrossed, label: "Food Salvage" },
-  { to: "/app/blood", icon: Droplet, label: "Blood Registry" },
-  { to: "/app/emergency", icon: Siren, label: "Emergency Board" },
-  { to: "/app/impact", icon: BarChart3, label: "Community Impact" },
+  { to: "/app", section: "dashboard", icon: LayoutDashboard, label: "Dashboard", end: true },
+  { to: "/app/resources", section: "resources", icon: Package, label: "Resources" },
+  { to: "/app/food", section: "food", icon: UtensilsCrossed, label: "Food rescue" },
+  { to: "/app/blood", section: "blood", icon: Droplet, label: "Blood requests" },
+  { to: "/app/emergency", section: "emergency", icon: Siren, label: "Emergency support" },
+  { to: "/app/impact", section: "impact", icon: BarChart3, label: "Impact" },
 ];
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const roleConfig = getRoleConfig(user?.role);
 
   const handleLogout = () => {
     logout();
@@ -26,36 +26,27 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-paper text-ink">
+    <div className="flex min-h-screen bg-paper">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface md:flex">
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-line">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary-500 font-serif text-base font-bold text-paper">
-            r
+        <div className="flex items-center gap-2 px-6 py-5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 font-display text-sm font-bold text-white">
+            R
           </div>
-          <div>
-            <span className="font-serif text-xl font-semibold tracking-tight text-ink lowercase block leading-none">
-              resqlink
-            </span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-muted block mt-1">
-              Mutual Aid Network
-            </span>
-          </div>
+          <span className="font-display text-lg font-bold text-ink">ResQLink</span>
         </div>
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {NAV.map(({ to, icon: Icon, label, end }) => (
+        <nav className="flex-1 space-y-1 px-3 py-2">
+          {NAV.filter(({ section }) => section === "dashboard" || canAccess(user?.role, section)).map(({ to, icon: Icon, label, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-md px-3 py-2.5 text-xs font-mono uppercase tracking-[0.14em] transition-colors ${
-                  isActive
-                    ? "bg-primary-500 text-paper shadow-sm"
-                    : "text-ink-soft hover:bg-paper-soft/70 hover:text-ink"
+                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive ? "bg-primary-500 text-white" : "text-ink-soft hover:bg-primary-50 hover:text-primary-700"
                 }`
               }
             >
-              <Icon size={16} />
+              <Icon size={18} />
               {label}
             </NavLink>
           ))}
@@ -63,84 +54,51 @@ export default function Layout() {
             <NavLink
               to="/app/verifications"
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-md px-3 py-2.5 text-xs font-mono uppercase tracking-[0.14em] transition-colors ${
-                  isActive
-                    ? "bg-primary-500 text-paper shadow-sm"
-                    : "text-ink-soft hover:bg-paper-soft/70 hover:text-ink"
+                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive ? "bg-primary-500 text-white" : "text-ink-soft hover:bg-primary-50 hover:text-primary-700"
                 }`
               }
             >
-              <ShieldCheck size={16} />
+              <ShieldCheck size={18} />
               Verifications
             </NavLink>
           )}
-          <NavLink
-            to="/app/orders"
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-md px-3 py-2.5 text-xs font-mono uppercase tracking-[0.14em] transition-colors ${
-                isActive ? "bg-primary-500 text-paper shadow-sm" : "text-ink-soft hover:bg-paper-soft/70 hover:text-ink"
-              }`
-            }
-          >
-            <ShoppingCart size={16} />
-            My Orders
-          </NavLink>
         </nav>
-        <div className="border-t border-line px-3 py-3 bg-surface-soft/40">
+        <div className="border-t border-line px-3 py-3">
           <NavLink
             to="/app/profile"
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-md px-3 py-2 text-xs font-mono tracking-wide ${
-                isActive ? "bg-paper-soft text-ink font-medium" : "text-ink-soft hover:bg-paper-soft/60"
+              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
+                isActive ? "bg-primary-50 text-primary-700" : "text-ink-soft hover:bg-primary-50"
               }`
             }
           >
-            <User size={16} />
+            <User size={18} />
             <span className="truncate">{user?.username}</span>
           </NavLink>
           <button
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-md px-3 py-2 text-xs font-mono tracking-wide text-ink-soft hover:bg-urgent-50 hover:text-urgent-500 transition-colors"
+            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-soft hover:bg-urgent-50 hover:text-urgent-600"
           >
-            <LogOut size={16} />
-            Sign Out
+            <LogOut size={18} />
+            Log out
           </button>
         </div>
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-line bg-surface/90 backdrop-blur-sm px-4 py-3 md:px-8">
-          <div className="flex items-center gap-4">
-            <button type="button" onClick={() => navigate(-1)} className="text-ink-soft hover:text-primary-500" aria-label="Go back">
-              <ArrowLeft size={18} />
-            </button>
-            <div className="md:hidden font-serif text-xl font-bold text-ink lowercase">resqlink</div>
-          </div>
-          <div className="hidden md:flex items-center gap-2 text-xs font-mono text-ink-muted uppercase tracking-widest">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-700 animate-pulse" />
-            <span>Mysuru Dispatch</span>
-            <span>·</span>
-            <span className="text-[#2C3A2C] font-semibold">Active Mesh</span>
-          </div>
+        <header className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 md:px-8">
+          <div className="md:hidden font-display text-lg font-bold text-primary-700">ResQLink</div>
+          <div className="hidden md:block" />
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-line bg-paper-soft px-3 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-ink-soft sm:inline-block">
-              {user?.role?.replace("_", " ")}
+            <span className="hidden rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold capitalize text-primary-700 sm:inline-block">
+              {roleConfig.label}
             </span>
             <NotificationBell />
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+        <main className="page-transition flex-1 p-4 md:p-8">
+          <Outlet />
         </main>
       </div>
     </div>
