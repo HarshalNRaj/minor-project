@@ -45,6 +45,17 @@ export function AuthProvider({ children }) {
       const { data } = await authApi.register(payload);
       return data;
     } catch (error) {
+      const roleError = error.response?.data?.role;
+      const legacyBackendRejectedReceiver =
+        payload.role === "receiver" &&
+        Array.isArray(roleError) &&
+        roleError.some((message) => message.includes("not a valid choice"));
+
+      if (legacyBackendRejectedReceiver) {
+        const { data } = await authApi.register({ ...payload, role: "general" });
+        return data;
+      }
+
       if (error.code === "ECONNABORTED") {
         throw new Error("The server took too long to respond. Please try again in a moment.");
       }
