@@ -40,7 +40,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (username, password) => {
-    const { data } = await authApi.login(username, password);
+    const normalizedUsername = username.trim().toLowerCase();
+    const { data } = await authApi.login(normalizedUsername, password);
     const resolvedUser = applyRoleAlias(data.user);
     localStorage.setItem("resqlink_access", data.access);
     localStorage.setItem("resqlink_refresh", data.refresh);
@@ -51,12 +52,16 @@ export function AuthProvider({ children }) {
 
   const register = async (payload) => {
     try {
+      const normalizedPayload = {
+        ...payload,
+        username: payload.username.trim().toLowerCase(),
+      };
       const apiPayload = payload.role === "receiver"
-        ? { ...payload, role: "general" }
-        : payload;
+        ? { ...normalizedPayload, role: "general" }
+        : normalizedPayload;
       const { data } = await authApi.register(apiPayload);
       if (payload.role === "receiver") {
-        localStorage.setItem(`resqlink_role_alias:${payload.username}`, "receiver");
+        localStorage.setItem(`resqlink_role_alias:${normalizedPayload.username}`, "receiver");
       }
       return data;
     } catch (error) {

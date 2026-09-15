@@ -20,7 +20,10 @@ export default function Login() {
       await login(form.username, form.password);
       navigate("/app");
     } catch (err) {
-      setError(err.response?.data?.detail || "Couldn't sign in. Check your username and password.");
+      setError(
+        err.response?.data?.detail ||
+        "We couldn't find an active account with those credentials. Use the exact username and password from registration, or create a new account."
+      );
     } finally {
       setLoading(false);
     }
