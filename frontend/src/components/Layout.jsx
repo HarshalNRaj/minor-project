@@ -5,6 +5,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
 import { canAccess, getRoleConfig } from "../roleAccess";
+import BackButton from "./BackButton";
 
 const NAV = [
   { to: "/app", section: "dashboard", icon: LayoutDashboard, label: "Dashboard", end: true },
@@ -98,6 +99,9 @@ export default function Layout() {
           </div>
         </header>
         <main className="page-transition flex-1 p-4 md:p-8">
+          <div className="mb-4">
+            <BackButton fallback="/app" />
+          </div>
           <Outlet />
         </main>
       </div>

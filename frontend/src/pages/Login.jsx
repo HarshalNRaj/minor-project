@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
 import { FieldLabel, PasswordInput, TextInput } from "../components/ui";
+import BackButton from "../components/BackButton";
 
 export default function Login() {
   const { login } = useAuth();
@@ -28,6 +29,9 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-paper px-4">
       <div className="w-full max-w-sm">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         <div className="mb-8 flex flex-col items-center">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-500 font-display text-lg font-bold text-white">
             R
