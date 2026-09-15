@@ -6,7 +6,8 @@ const AuthContext = createContext(null);
 function applyRoleAlias(user) {
   if (!user?.username) return user;
   const alias = localStorage.getItem(`resqlink_role_alias:${user.username}`);
-  return alias && user.role === "general" ? { ...user, role: alias } : user;
+  if (alias && user.role === "general") return { ...user, role: alias };
+  return user.role === "general" ? { ...user, role: "receiver" } : user;
 }
 
 export function AuthProvider({ children }) {
